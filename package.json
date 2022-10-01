@@ -2,14 +2,18 @@
   "name": "parsehub",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "parsehub.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "keywords": [
+    "parsehub",
+    "parsehubapi",
+    "website scrapper"
+  ],
+  "author": "as009",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.27.2",
-    "express": "^4.18.1"
+    "axios": "^0.27.2"
   }
 }

@@ -1,17 +1,16 @@
 'use strict';
 
 const axios = require('axios');
-var request = require('request');
-var base = 'https://www.parsehub.com';
+const baseUrl = 'https://www.parsehub.com/api/v2';
 
 /**
  * Constructor - takes your ParseHub API key
  */
-function ParseHub(apiKey) {
-	if (!apiKey)
+function ParseHub(api_key) {
+	if (!api_key)
 		throw Error('Please specify a ParseHub API key');
 
-	this._apiKey = apiKey;
+	this._api_key = api_key;
 }
 
 /**
@@ -19,128 +18,55 @@ function ParseHub(apiKey) {
  *
  * Parameters:
  *
- * include_last_run (Optional) - If set to anything other than '0', each job object in the result includes a last_run property containing the run object for the last run that was initiated for this job. If no runs have been initiated for the job, the last_run property is not included. Defaults to '0'.
+ * include_last_run (Optional) - If set to anything other than '0', each run object in the result includes a last_run property containing the run object for the last run that was initiated for this run. If no runs have been initiated for the run, the last_run property is not included. Defaults to '0'.
  *
  * On success, returns an object with:
  *
- * scrapejobs - A list of all your job objects. Each job object may have an additional last_run property, depending on the include_last_run parameter.
+ * scrapejobs - A list of all your run objects. Each run object may have an additional last_run property, depending on the include_last_run parameter.
  */
-ParseHub.prototype.getAllJobs = function (params, callback) {
-	var callback = callback || params || function () { };
-	params = (typeof params === 'object') ? params : {};
-
-	params.api_key = this._apiKey;
-
-	axios.get('https://example.com/todos',{params})
-		.then(res => {
-			console.log(`statusCode: ${res.status}`);
-			console.log(res);
-			if (res.status !== 200)
-				return callback(new Error(body));
-
-			try {
-				var json = JSON.parse(body);
-				callback(err, json.scrapejobs || []);
-			}
-			catch (e) {
-				callback(new Error('Could not parse response body'));
-			}
+ParseHub.prototype.getProjectList = function (callback) {
+	var config = {
+		method: 'get',
+		url: `${baseUrl}/projects?api_key=${this._api_key}`,
+		headers: {}
+	};
+	axios(config)
+		.then(function (response) {
+			// console.log(JSON.stringify(response.data).slice(1, 5));
+			callback(response.data);
 		})
-		.catch(error => {
-			console.error(error);
-		});
-
-	request({
-		url: base + '/api/scrapejob',
-		qs: params
-	},
-		function (err, resp, body) {
-			if (resp.statusCode !== 200)
-				return callback(new Error(body));
-
-			try {
-				var json = JSON.parse(body);
-				callback(err, json.scrapejobs || []);
-			}
-			catch (e) {
-				callback(new Error('Could not parse response body'));
-			}
+		.catch(function (error) {
+			callback(error);
 		});
 };
 
 /**
- * Delete an existing job
+ * Run an instance of a run that was previously created
  *
  * Parameters:
  *
- * token - The token of the job you'd like to delete
- *
- * On success, returns an object with:
- *
- * token - The token of the job that was deleted
- */
-ParseHub.prototype.deleteJob = function (params, callback) {
-	var callback = callback || function () { };
-
-	if (!params || !params.token)
-		throw new Error('Please specify a job token');
-
-	params.api_key = this._apiKey;
-
-	request.post({
-		url: base + '/api/scrapejob/delete',
-		formData: params
-	},
-		function (err, resp, body) {
-			if (resp.statusCode !== 200)
-				return callback(new Error(body));
-
-			try {
-				var json = JSON.parse(body);
-				callback(err, json.token);
-			}
-			catch (e) {
-				callback(new Error('Could not parse response body'));
-			}
-		});
-}
-
-/**
- * Run an instance of a job that was previously created
- *
- * Parameters:
- *
- * token - The token of the job you'd like to run
- * start_url (Optional) - Run the job starting at this url rather than on the default starting url for the job
- * start_value_override (Optional) - Override the starting JSON value of the global scope. This can be used to pass parameters to your run. For example, you may pass {'query': 'San Francisco'} in order to use the query in an expression somewhere in your job.
+ * token - The token of the run you'd like to run
+ * start_url (Optional) - Run the run starting at this url rather than on the default starting url for the run
+ * start_value_override (Optional) - Override the starting JSON value of the global scope. This can be used to pass parameters to your run. For example, you may pass {'query': 'San Francisco'} in order to use the query in an expression somewhere in your run.
  *
  * On success, returns an object with:
  *
  * run_token - The unique identifier of the run that was created
  */
-ParseHub.prototype.runJob = function (params, callback) {
-	var callback = callback || function () { };
+ParseHub.prototype.runProject = function (projectToken, callback) {
+	var config = {
+		method: 'post',
+		url: `${baseUrl}/projects/${projectToken}/run?api_key=${this._api_key}`,
+		headers: {}
+	};
 
-	if (!params || !params.token)
-		throw new Error('Please specify a job token');
-
-	params.api_key = this._apiKey;
-
-	request.post({
-		url: base + '/api/scrapejob/run',
-		formData: params
-	},
-		function (err, resp, body) {
-			if (resp.statusCode !== 200)
-				return callback(new Error(body));
-
-			try {
-				var json = JSON.parse(body);
-				callback(err, json.run_token);
-			}
-			catch (e) {
-				callback(new Error('Could not parse response body'));
-			}
+	axios(config)
+		.then(function (response) {
+			// callback(response.data);
+			callback(response.data);
+		})
+		.catch(function (error) {
+			callback(error);
 		});
 };
 
@@ -155,66 +81,19 @@ ParseHub.prototype.runJob = function (params, callback) {
  *
  * run - The run object corresponding to the run_token provided
  */
-ParseHub.prototype.getRunStatus = function (params, callback) {
-	var callback = callback || function () { };
+ParseHub.prototype.getRunStatus = function (runToken, callback) {
+	var config = {
+		method: 'get',
+		url: `${baseUrl}/runs/${runToken}?api_key=${this._api_key}`,
+		headers: {}
+	};
 
-	if (!params || !params.run_token)
-		throw new Error('Please specify a run token');
-
-	params.api_key = this._apiKey;
-
-	request({
-		url: base + '/api/scrapejob/run_status',
-		qs: params
-	},
-		function (err, resp, body) {
-			if (resp.statusCode !== 200)
-				return callback(new Error(body));
-
-			try {
-				var json = JSON.parse(body);
-				callback(err, json || {});
-			}
-			catch (e) {
-				callback(new Error('Could not parse response body'));
-			}
-		});
-};
-
-/**
- * Return a list of all runs of one of your jobs
- *
- * Parameters:
- *
- * token - The unique identifier of the job that you'd like to get the status of
- *
- * On success, returns an object with:
- *
- * runList - A list of all run objects corresponding to this job.
- */
-ParseHub.prototype.getStatus = function (params, callback) {
-	var callback = callback || function () { };
-
-	if (!params || !params.token)
-		throw new Error('Please specify a job token');
-
-	params.api_key = this._apiKey;
-
-	request({
-		url: base + '/api/scrapejob/status',
-		qs: params
-	},
-		function (err, resp, body) {
-			if (resp.statusCode !== 200)
-				return callback(new Error(body));
-
-			try {
-				var json = JSON.parse(body);
-				callback(err, json.runList);
-			}
-			catch (e) {
-				callback(new Error('Could not parse response body'));
-			}
+	axios(config)
+		.then(function (response) {
+			callback(response.data);
+		})
+		.catch(function (error) {
+			callback(error);
 		});
 };
 
@@ -229,30 +108,21 @@ ParseHub.prototype.getStatus = function (params, callback) {
  *
  * run_token	The unique identifier of the run that was cancelled
  */
-ParseHub.prototype.cancelRun = function (params, callback) {
-	var callback = callback || function () { };
+ParseHub.prototype.cancelProjectRun = function (runToken, callback) {
+	var config = {
+		method: 'post',
+		url: `${baseUrl}/runs/${runToken}/cancel?api_key=${this._api_key}`,
+		headers: {}
+	};
 
-	if (!params || !params.run_token)
-		throw new Error('Please specify a run token');
-
-	params.api_key = this._apiKey;
-
-	request.post({
-		url: base + '/api/scrapejob/cancel',
-		formData: params
-	},
-		function (err, resp, body) {
-			if (resp.statusCode !== 200)
-				return callback(new Error(body));
-
-			try {
-				var json = JSON.parse(body);
-				callback(err, json.run_token);
-			}
-			catch (e) {
-				callback(new Error('Could not parse response body'));
-			}
+	axios(config)
+		.then(function (response) {
+			callback(response.data);
+		})
+		.catch(function (error) {
+			callback(error);
 		});
+
 };
 
 /**
@@ -272,35 +142,51 @@ ParseHub.prototype.cancelRun = function (params, callback) {
 *
 * Returns a json response which is the global scope of the run.
 */
-ParseHub.prototype.getResults = function (params, callback) {
-	var callback = callback || function () { };
+ParseHub.prototype.getRunData = function (runToken, callback) {
+	var config = {
+		method: 'get',
+		url: `${baseUrl}/runs/${runToken}/data?api_key=${this._api_key}`,
+		headers: {}
+	};
 
-	if (!params || !params.run_token)
-		throw new Error('Please specify a run token');
-
-	params.api_key = this._apiKey;
-	params.raw = 1; // @todo - zip files are not supported
-
-	request({
-		url: base + '/api/scrapejob/dl',
-		qs: params
-	},
-		function (err, resp, body) {
-			if (resp.statusCode !== 200)
-				return callback(new Error(body));
-
-			try {
-				if (params.raw && params.raw !== 0) {
-					var json = JSON.parse(body);
-					callback(err, json);
-				}
-				else
-					callback(err, body);
-			}
-			catch (e) {
-				callback(new Error('Could not parse response body'));
-			}
+	axios(config)
+		.then(function (response) {
+			callback(response.data);
+		})
+		.catch(function (error) {
+			callback(error);
 		});
+
 };
+
+/**
+ * Delete an existing run
+ *
+ * Parameters:
+ *
+ * token - The token of the run you'd like to delete
+ *
+ * On success, returns an object with:
+ *
+ * token - The token of the run that was deleted
+ */
+ParseHub.prototype.deleteProjectRun = function (runToken, callback) {
+
+	var config = {
+		method: 'delete',
+		url: `${baseUrl}/runs/${runToken}?api_key=${this._api_key}`,
+		headers: {}
+	};
+
+	axios(config)
+		.then(function (response) {
+			callback(response.data);
+		})
+		.catch(function (error) {
+			callback(error);
+		});
+
+
+}
 
 module.exports = ParseHub;
