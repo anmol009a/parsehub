@@ -1,7 +1,7 @@
 {
   "name": "parsehub-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is the unofficial Node.js client for ParseHub, a platform for scraping websites and creating APIs out of the extracted data.",
   "main": "parsehub.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
