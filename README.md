@@ -24,16 +24,7 @@ api.getProjectList(function(err, ProjectList)
 {
 	console.log(ProjectList);
 });
-
-api.getProjectList({ include_last_run: true }, function(err, ProjectList)
-{
-	console.log(ProjectList);
-});
 ```
-
-*Parameters*
-
-* include_last_run (Optional) - If set to anything other than '0', each job object in the result includes a last_run property containing the run object for the last run that was initiated for this job. If no runs have been initiated for the job, the last_run property is not included. Defaults to '0'.
 
 *On success, returns an object with*
 
@@ -42,7 +33,7 @@ api.getProjectList({ include_last_run: true }, function(err, ProjectList)
 **Delete an existing job**
 
 ```
-api.deleteJob({ token: 'your_token' }, function(err, deletedJobToken)
+api.deleteProjectRun({runToken}, function(err, deletedJobToken)
 {
 	console.log(deletedJobToken);
 });
@@ -55,28 +46,10 @@ api.deleteJob({ token: 'your_token' }, function(err, deletedJobToken)
 
 * token - The token of the job that was deleted
 
-**Run an instance of a job that was previously created**
-
-```
-api.runJob({ token: 'your_token' }, function(err, runToken)
-{
-	console.log(runToken);
-});
-```
-*Parameters*
-
-* token - The token of the job you'd like to run
-* start_url (Optional) - Run the job starting at this url rather than on the default starting url for the job
-* start_value_override (Optional) - Override the starting JSON value of the global scope. This can be used to pass parameters to your run. For example, you may pass {'query': 'San Francisco'} in order to use the query in an expression somewhere in your job.
-
-*On success, returns an object with*
-
-* run_token - The unique identifier of the run that was created
-
 **Return the status of a single run of one of your jobs**
 
 ```
-api.getRunStatus({ run_token: 'your_token' }, function(err, run)
+api.getRunStatus({runToken}, function(err, run)
 {
 	console.log(run);
 });
@@ -89,26 +62,10 @@ api.getRunStatus({ run_token: 'your_token' }, function(err, run)
 
 * run - The run object corresponding to the run_token provided
 
-**Return a list of all runs of one of your jobs**
-
-```
-api.getStatus({ token: 'your_token' }, function(err, runList)
-{
-	console.log(runList);
-});
-```
-*Parameters*
-
-* token - The unique identifier of the job that you'd like to get the status of
-
-*On success, returns an object with*
-
-* runList - A list of all run objects corresponding to this job.
-
 **Cancel a single run**
 
 ```
-api.cancelRun({ run_token: 'your_token' }, function(err, cancelledRunToken)
+api.cancelProjectRun({runToken}, function(err, cancelledRunToken)
 {
 	console.log(cancelledRunToken);
 });
@@ -124,7 +81,7 @@ api.cancelRun({ run_token: 'your_token' }, function(err, cancelledRunToken)
 **Get the result of a single run**
 
 ```
-api.getResults({ run_token: 'your_token' }, function(err, results)
+api.getRunData({runToken}, function(err, results)
 {
 	console.log(results);
 });
