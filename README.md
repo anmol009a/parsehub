@@ -14,8 +14,8 @@ This is the **unofficial** Node.js client for [ParseHub](https://www.parsehub.co
 
 Require the module and initialize an instance using your ParseHub API key.
 
-    var ParseHub = require('parsehub-api'),
-    var api = new ParseHub(yourApiKey);
+    const ParseHub = require('parsehub-api'),
+    const api = new ParseHub(yourApiKey);
 
 **Return a list of all projects belonging to you**
 
